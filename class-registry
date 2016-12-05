@@ -1,0 +1,120 @@
+<?php
+// version 1
+class Registry
+{   
+    private static $container = array();
+    
+    public static function set($key, $value)
+    {   // Проверим наличие элемента в контейнере
+        if(!isset(self::$container[$key]))
+            self::$container[$key] = $value;
+        else
+            trigger_error('Variable '. $key .' already defined', E_USER_WARNING);
+    }
+   // Этот метод не проверяет наличия
+    public static function change($key, $value)
+    {
+        self::$container[$key] = $value;
+    }   
+   
+    public static function get($key)
+    {
+        return self::$container[$key];
+    }    
+}
+
+Registry::set('name', ' Вася '); 
+    // Так можно обойти запрет
+Registry::change('name', ' Петя ');
+    // Получаем данные геттером
+echo Registry::get('name');
+
+//**********************************
+
+//version 2
+class Registry 
+{
+    private $container = array();
+
+    public function __set($key, $value) 
+    {
+        if(!isset($this->container[$key]))
+            $this->container[$key] = $value;
+        else
+            trigger_error('Variable '. $key .' already defined', E_USER_WARNING);
+    }
+
+    public function __get($key) 
+    {
+        return $this->container[$key];
+    }
+	private function __wakeup(){} 
+	private function __clone(){}  
+} 
+    
+    $RG = new Registry(); 
+    
+    $RG->name = 'Вася';  
+    $RG->name = 'Петя';
+    
+    echo $RG->name;
+
+// ************************
+
+//version 3
+class Product
+{
+
+    /**
+     * @var mixed[]
+     */
+    protected static $data = array();
+
+
+    /**
+     * Добавляет значение в реестр
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return void
+     */
+    public static function set($key, $value)
+    {
+        self::$data[$key] = $value;
+    }
+
+    /**
+     * Возвращает значение из реестра по ключу
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public static function get($key)
+    {
+        return isset(self::$data[$key]) ? self::$data[$key] : null;
+    }
+
+    /**
+     * Удаляет значение из реестра по ключу
+     *
+     * @param string $key
+     * @return void
+     */
+    final public static function removeProduct($key)
+    {
+        if (array_key_exists($key, self::$data)) {
+            unset(self::$data[$key]);
+        }
+    }
+}
+
+/*
+ * =====================================
+ *           USING OF REGISTRY
+ * =====================================
+ */
+
+Product::set('name', 'First product');
+
+echo Product::get('name');
+?>
